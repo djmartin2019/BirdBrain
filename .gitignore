@@ -1,0 +1,21 @@
+# Dataset directories (download separately; see README)
+data/
+training-data/
+
+# Virtual environments
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Training outputs
+models/
+
+# OS
+.DS_Store
