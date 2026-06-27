@@ -3,12 +3,15 @@ from torchvision import transforms
 
 from dataset import CUBDataset
 
-def get_dataloaders(data_dir, batch_size=32, num_workers=4):
+
+def get_dataloaders(data_dir, batch_size=32, num_workers=4, use_bbox_crop=True):
     train_transform = transforms.Compose([
         transforms.Resize((256, 256)),
         transforms.RandomResizedCrop(224),
         transforms.RandomHorizontalFlip(),
         transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),
+        transforms.RandomRotation(15),
+        transforms.RandomAffine(degrees=0, translate=(0.05, 0.05)),
         transforms.ToTensor(),
         transforms.Normalize(
             mean=[0.485, 0.456, 0.406],
@@ -30,12 +33,14 @@ def get_dataloaders(data_dir, batch_size=32, num_workers=4):
         root_dir=data_dir,
         split="train",
         transform=train_transform,
+        use_bbox_crop=use_bbox_crop,
     )
 
     val_dataset = CUBDataset(
         root_dir=data_dir,
         split="val",
         transform=val_transform,
+        use_bbox_crop=use_bbox_crop,
     )
 
     train_loader = DataLoader(

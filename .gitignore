@@ -16,6 +16,9 @@ build/
 
 # Training outputs
 models/
+mlruns/
+mlflow.db
+mlartifacts/
 
 # OS
 .DS_Store

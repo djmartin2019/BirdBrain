@@ -15,6 +15,8 @@ birdbrain/
 │   ├── train.py             # Model training script
 │   └── make_labels.py       # Export class index → readable name map
 ├── models/                  # Saved checkpoints and labels.json (created at runtime)
+├── mlflow.db                # MLflow experiment tracking (created at runtime)
+├── mlartifacts/             # MLflow run artifacts (created at runtime)
 ├── db/schema.sql            # Postgres schema for prediction logging (planned)
 └── requirements.txt
 ```
@@ -80,6 +82,20 @@ python make_labels.py
 ```
 
 Output: `models/labels.json`
+
+## Experiment tracking (MLflow)
+
+Training runs are logged to a local SQLite database at `mlflow.db` (artifacts in `mlartifacts/`).
+
+Start the UI from the project root:
+
+```bash
+cd birdbrain
+source .venv/bin/activate
+mlflow ui --backend-store-uri "sqlite:///$(pwd)/mlflow.db"
+```
+
+Open [http://localhost:5000](http://localhost:5000) to compare runs, metrics, and saved checkpoints.
 
 ## Model output (planned inference format)
 
