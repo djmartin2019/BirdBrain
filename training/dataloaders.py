@@ -82,3 +82,34 @@ def get_dataloaders(cfg: TrainConfig):
     )
 
     return train_loader, val_loader
+
+
+def get_eval_dataloader(
+    cfg: TrainConfig,
+    split: str = "test",
+    use_bbox_crop: bool | None = None,
+    batch_size: int | None = None,
+):
+    """Deterministic loader for final evaluation (no augmentation)."""
+    data = cfg.data
+    if use_bbox_crop is None:
+        use_bbox_crop = data.use_bbox_crop
+
+    transform = _build_val_transform(data.image_size)
+    dataset = CUBDataset(
+        root_dir=data.data_dir,
+        split=split,
+        transform=transform,
+        use_bbox_crop=use_bbox_crop,
+        val_split_file=data.val_split_file,
+    )
+
+    loader = DataLoader(
+        dataset,
+        batch_size=batch_size or cfg.training.batch_size,
+        shuffle=False,
+        num_workers=data.num_workers,
+        pin_memory=True,
+    )
+
+    return loader

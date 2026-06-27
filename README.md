@@ -97,6 +97,18 @@ python make_labels.py
 
 Output: `models/labels.json`
 
+### Final evaluation (official test set)
+
+After training, evaluate a checkpoint once on the held-out **test** split:
+
+```bash
+cd training
+python evaluate.py --config ../configs/efficientnet_stage5_bbox.yaml \
+  --checkpoint ../models/birdbrain_v1-4.pt --split test
+```
+
+Use `--split val` to re-score on the validation holdout. Add `--mlflow` to log the eval run. Writes a JSON report next to the checkpoint (e.g. `birdbrain_v1-4.eval.json`).
+
 ## Experiment tracking (MLflow)
 
 Training runs are logged to a local SQLite database at `mlflow.db` (artifacts in `mlartifacts/`).

@@ -84,6 +84,23 @@ def _resolve_path(value: str | None, project_root: Path) -> Path | None:
     return path
 
 
+def resolve_cli_path(path: str | Path, project_root: Path = PROJECT_ROOT) -> Path:
+    """Resolve a CLI path: cwd-relative first, then project-root-relative."""
+    path = Path(path)
+    if path.is_absolute():
+        return path.resolve()
+
+    cwd_resolved = (Path.cwd() / path).resolve()
+    root_resolved = (project_root / path).resolve()
+    if cwd_resolved.exists():
+        return cwd_resolved
+    if root_resolved.exists():
+        return root_resolved
+    if ".." in path.parts:
+        return cwd_resolved
+    return root_resolved
+
+
 def _require_section(raw: dict, key: str) -> dict:
     if key not in raw:
         raise ValueError(f"Missing required config section: {key}")
@@ -177,6 +194,10 @@ def load_config(config_path: str | Path) -> TrainConfig:
             use_bbox_crop=bool(data_raw.get("use_bbox_crop", False)),
             augmentation=augmentation,
             num_workers=int(data_raw.get("num_workers", 4)),
+            val_split_file=_resolve_path(
+                data_raw.get("val_split_file", "splits/val_split.txt"),
+                project_root,
+            ),
         ),
         mlflow=MlflowConfig(
             experiment=mlflow_raw.get("experiment", "birdbrain-cub200"),

@@ -76,6 +76,13 @@ def build_model(cfg: TrainConfig):
     return model
 
 
+def build_model_for_inference(model_name: str, num_classes: int):
+    """Build model architecture for loading a saved checkpoint (weights only)."""
+    if model_name not in MODEL_BUILDERS:
+        raise ValueError(f"Unsupported model: {model_name}")
+    return MODEL_BUILDERS[model_name](num_classes, pretrained=False)
+
+
 def get_param_groups(model, cfg: TrainConfig):
     """Build optimizer param groups with optional split learning rates."""
     trainable = [p for p in model.parameters() if p.requires_grad]
