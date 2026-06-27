@@ -53,6 +53,24 @@ Optional segmentations can live alongside the dataset if you add them later.
 
 **Note:** CUB images are restricted to non-commercial research and educational use. See the dataset website for terms.
 
+### Train / val / test splits
+
+CUB ships an official **train** (~5,994) and **test** (~5,794) split. For controlled experiments we further split official train into:
+
+| Split | Source | Used for |
+|-------|--------|----------|
+| **train** | 90% of official train | Weight updates |
+| **val** | 10% of official train | Early stopping, checkpoint selection |
+| **test** | Official CUB test | Final evaluation only (not used during training) |
+
+The val assignment lives in [`splits/val_split.txt`](splits/val_split.txt) (committed to the repo). Regenerate with:
+
+```bash
+python scripts/create_val_split.py
+```
+
+Configure path in YAML via `data.val_split_file` (default: `splits/val_split.txt`).
+
 ## Training
 
 Training is driven by YAML configs in `configs/`. Run from the `training/` directory:
@@ -78,13 +96,32 @@ The `recorded:` section in each YAML documents observed results from completed r
 
 ### ResNet50 staged pipeline
 
+Mirrors the five EfficientNet stages (head → last block → progressive fine-tune → bbox crop). Checkpoints chain under `models/birdbrain_resnet50_v1*.pt`:
+
+| Stage | Config | Unfrozen | Aug | Bbox |
+|-------|--------|----------|-----|------|
+| 1 | `resnet50_stage1_head.yaml` | fc only | minimal | no |
+| 2 | `resnet50_stage2_last_block.yaml` | layer4 | minimal | no |
+| 3 | `resnet50_stage3_finetune.yaml` | layer3–4 | standard | no |
+| 4 | `resnet50_stage4_finetune.yaml` | layer2–4 | standard | no |
+| 5 | `resnet50_stage5_bbox.yaml` | layer1–4 | strong | yes |
+
 ```bash
 python train.py --config ../configs/resnet50_stage1_head.yaml
-python train.py --config ../configs/resnet50_stage2_finetune.yaml
-python train.py --config ../configs/resnet50_stage3_bbox.yaml
+python train.py --config ../configs/resnet50_stage2_last_block.yaml
+python train.py --config ../configs/resnet50_stage3_finetune.yaml
+python train.py --config ../configs/resnet50_stage4_finetune.yaml
+python train.py --config ../configs/resnet50_stage5_bbox.yaml
 ```
 
-Training uses the official CUB train/test split (~5,994 train / ~5,794 test). Checkpoints include model weights, normalization settings, and validation accuracy for use at inference time.
+After stage 5, run final test eval once:
+
+```bash
+python evaluate.py --config ../configs/resnet50_stage5_bbox.yaml \
+  --checkpoint ../models/birdbrain_resnet50_v1-4.pt --split test --mlflow
+```
+
+Checkpoints include model weights, normalization settings, and validation accuracy for use at inference time.
 
 ### Generate label map
 

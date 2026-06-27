@@ -1,0 +1,39 @@
+experiment_name: bird_classifier_resnet50_stage3
+run_name: resnet50-stage3-finetune
+phase: "3"
+
+model:
+  name: resnet50
+  num_classes: 200
+  pretrained: true
+  checkpoint_path: models/birdbrain_resnet50_v1-1.pt
+  output_path: models/birdbrain_resnet50_v1-2.pt
+
+training:
+  epochs: 15
+  batch_size: 32
+  optimizer: adamw
+  learning_rate: 0.0005
+  backbone_learning_rate: 0.0001
+  weight_decay: 0.0001
+  label_smoothing: 0.0
+  freeze_backbone: true
+  unfreeze_blocks: 2
+  scheduler:
+    patience: 2
+    factor: 0.5
+  early_stopping_patience: null
+
+data:
+  data_dir: data/raw/CUB_200_2011
+  image_size: 224
+  use_bbox_crop: false
+  augmentation: standard
+  num_workers: 4
+  val_split_file: splits/val_split.txt
+
+mlflow:
+  experiment: birdbrain-cub200
+
+recorded:
+  notes: "Split LRs (backbone 1e-4, head 5e-4); layer3+4 unfrozen; standard augmentation"

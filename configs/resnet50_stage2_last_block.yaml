@@ -1,13 +1,13 @@
-experiment_name: bird_classifier_resnet50_stage1
-run_name: resnet50-stage1-head
-phase: "1"
+experiment_name: bird_classifier_resnet50_stage2
+run_name: resnet50-stage2-last-block
+phase: "2"
 
 model:
   name: resnet50
   num_classes: 200
   pretrained: true
-  checkpoint_path: null
-  output_path: models/birdbrain_resnet50_v1.pt
+  checkpoint_path: models/birdbrain_resnet50_v1.pt
+  output_path: models/birdbrain_resnet50_v1-1.pt
 
 training:
   epochs: 10
@@ -18,7 +18,7 @@ training:
   weight_decay: 0.0
   label_smoothing: 0.0
   freeze_backbone: true
-  unfreeze_blocks: 0
+  unfreeze_blocks: 1
   scheduler:
     patience: 2
     factor: 0.5
@@ -36,4 +36,4 @@ mlflow:
   experiment: birdbrain-cub200
 
 recorded:
-  notes: "Head-only baseline; frozen ResNet50 backbone, fc trained at lr 1e-3"
+  notes: "Unfroze ResNet layer4; loaded birdbrain_resnet50_v1.pt at lr 1e-3"
