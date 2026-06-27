@@ -1,0 +1,39 @@
+experiment_name: bird_classifier_efficientnet_stage5
+run_name: efficientnet-stage5-bbox-crop
+phase: "5"
+
+model:
+  name: efficientnet_b0
+  num_classes: 200
+  pretrained: true
+  checkpoint_path: models/birdbrain_v1-3.pt
+  output_path: models/birdbrain_v1-4.pt
+
+training:
+  epochs: 20
+  batch_size: 32
+  optimizer: adam
+  learning_rate: 0.0001
+  backbone_learning_rate: 0.00005
+  weight_decay: 0.0001
+  label_smoothing: 0.1
+  freeze_backbone: true
+  unfreeze_blocks: 5
+  scheduler:
+    patience: 2
+    factor: 0.5
+  early_stopping_patience: 5
+
+data:
+  data_dir: data/raw/CUB_200_2011
+  image_size: 224
+  use_bbox_crop: true
+  augmentation: strong
+  num_workers: 4
+
+mlflow:
+  experiment: birdbrain-cub200
+
+recorded:
+  best_val_acc: 0.77
+  notes: "Bounding box crop + 5 unfrozen blocks; strong augmentation; label smoothing 0.1"

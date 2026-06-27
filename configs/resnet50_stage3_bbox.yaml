@@ -1,0 +1,38 @@
+experiment_name: bird_classifier_resnet50_stage3
+run_name: resnet50-stage3-bbox-crop
+phase: "3"
+
+model:
+  name: resnet50
+  num_classes: 200
+  pretrained: true
+  checkpoint_path: models/resnet50_stage2.pt
+  output_path: models/resnet50_stage3.pt
+
+training:
+  epochs: 20
+  batch_size: 32
+  optimizer: adamw
+  learning_rate: 0.0001
+  backbone_learning_rate: 0.00005
+  weight_decay: 0.0001
+  label_smoothing: 0.1
+  freeze_backbone: true
+  unfreeze_blocks: 2
+  scheduler:
+    patience: 2
+    factor: 0.5
+  early_stopping_patience: 5
+
+data:
+  data_dir: data/raw/CUB_200_2011
+  image_size: 224
+  use_bbox_crop: true
+  augmentation: strong
+  num_workers: 4
+
+mlflow:
+  experiment: birdbrain-cub200
+
+recorded:
+  notes: "Bounding box crop + layer3/layer4 unfrozen; mirrors EfficientNet stage 5 recipe"

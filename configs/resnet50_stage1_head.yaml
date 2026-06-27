@@ -1,0 +1,38 @@
+experiment_name: bird_classifier_resnet50_stage1
+run_name: resnet50-stage1-head
+phase: "1"
+
+model:
+  name: resnet50
+  num_classes: 200
+  pretrained: true
+  checkpoint_path: null
+  output_path: models/resnet50_stage1.pt
+
+training:
+  epochs: 10
+  batch_size: 32
+  optimizer: adamw
+  learning_rate: 0.001
+  backbone_learning_rate: null
+  weight_decay: 0.0001
+  label_smoothing: 0.0
+  freeze_backbone: true
+  unfreeze_blocks: 0
+  scheduler:
+    patience: 2
+    factor: 0.5
+  early_stopping_patience: 3
+
+data:
+  data_dir: data/raw/CUB_200_2011
+  image_size: 224
+  use_bbox_crop: false
+  augmentation: minimal
+  num_workers: 4
+
+mlflow:
+  experiment: birdbrain-cub200
+
+recorded:
+  notes: "ResNet50 head-only baseline; template for iterative training"

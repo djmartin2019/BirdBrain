@@ -1,6 +1,6 @@
 # Birdbrain
 
-Bird species classifier trained on the [Caltech-UCSD Birds-200-2011 (CUB-200-2011)](https://www.vision.caltech.edu/datasets/cub_200_2011/) dataset. The model uses EfficientNet-B0 with transfer learning to identify one of 200 bird species from a photo.
+Bird species classifier trained on the [Caltech-UCSD Birds-200-2011 (CUB-200-2011)](https://www.vision.caltech.edu/datasets/cub_200_2011/) dataset. Supports EfficientNet-B0 and ResNet50 with YAML-driven staged training.
 
 Planned follow-ups include a web upload interface, inference API, and deployment to `birdbrain.djm-apps.com`.
 
@@ -8,11 +8,15 @@ Planned follow-ups include a web upload interface, inference API, and deployment
 
 ```
 birdbrain/
+├── configs/                 # YAML training configs per model/stage
 ├── data/raw/CUB_200_2011/   # Dataset metadata and images/
 ├── training/
+│   ├── config.py            # YAML config loader
+│   ├── models.py            # Model builders (EfficientNet, ResNet50)
+│   ├── trainer.py           # Training loop, MLflow, checkpoints
+│   ├── train.py             # CLI entry point
 │   ├── dataset.py           # PyTorch Dataset for CUB
-│   ├── dataloaders.py       # Train/val DataLoaders and transforms
-│   ├── train.py             # Model training script
+│   ├── dataloaders.py       # Augmentation presets and DataLoaders
 │   └── make_labels.py       # Export class index → readable name map
 ├── models/                  # Saved checkpoints and labels.json (created at runtime)
 ├── mlflow.db                # MLflow experiment tracking (created at runtime)
@@ -50,24 +54,33 @@ Optional segmentations can live alongside the dataset if you add them later.
 
 ## Training
 
-All training commands are run from the `training/` directory so imports and relative paths resolve correctly.
-
-### Phase 1 — classifier head only
-
-Train with a frozen backbone and only the final linear layer updating. Save the checkpoint as `models/birdbrain_v1.pt` (adjust `CHECKPOINT_PATH` / `MODEL_OUTPUT_PATH` in `train.py` as needed).
+Training is driven by YAML configs in `configs/`. Run from the `training/` directory:
 
 ```bash
 cd training
-python train.py
+python train.py --config ../configs/efficientnet_stage1_head.yaml
 ```
 
-### Phase 2 — fine-tune last backbone block
+### EfficientNet staged pipeline (historical)
 
-The current `train.py` loads weights from `models/birdbrain_v1.pt`, unfreezes the last EfficientNet feature block plus the classifier, and saves the best checkpoint to `models/birdbrain_v1-1.pt`.
+Each stage loads the prior checkpoint and saves a new one under `models/`:
 
 ```bash
-cd training
-python train.py
+python train.py --config ../configs/efficientnet_stage1_head.yaml
+python train.py --config ../configs/efficientnet_stage2_last_block.yaml
+python train.py --config ../configs/efficientnet_stage3_finetune.yaml
+python train.py --config ../configs/efficientnet_stage4_finetune.yaml
+python train.py --config ../configs/efficientnet_stage5_bbox.yaml   # ~77% val acc
+```
+
+The `recorded:` section in each YAML documents observed results from completed runs.
+
+### ResNet50 staged pipeline
+
+```bash
+python train.py --config ../configs/resnet50_stage1_head.yaml
+python train.py --config ../configs/resnet50_stage2_finetune.yaml
+python train.py --config ../configs/resnet50_stage3_bbox.yaml
 ```
 
 Training uses the official CUB train/test split (~5,994 train / ~5,794 test). Checkpoints include model weights, normalization settings, and validation accuracy for use at inference time.
