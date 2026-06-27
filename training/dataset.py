@@ -20,7 +20,14 @@ def crop_to_bbox(image, x, y, width, height):
 
 
 class CUBDataset(Dataset):
-    def __init__(self, root_dir, split="train", transform=None, use_bbox_crop=False):
+    def __init__(
+        self,
+        root_dir,
+        split="train",
+        transform=None,
+        use_bbox_crop=False,
+        val_split_file=None,
+    ):
         self.root_dir = Path(root_dir)
         self.images_dir = self.root_dir / "images"
         self.transform = transform
@@ -38,13 +45,32 @@ class CUBDataset(Dataset):
             names=["image_id", "class_id"],
         )
 
-        splits = pd.read_csv(
+        official_split = pd.read_csv(
             self.root_dir / "train_test_split.txt",
             sep=" ",
             names=["image_id", "is_train"],
         )
 
-        df = images.merge(labels, on="image_id").merge(splits, on="image_id")
+        df = images.merge(labels, on="image_id").merge(official_split, on="image_id")
+
+        val_split_path = Path(val_split_file) if val_split_file else None
+        if val_split_path is None:
+            val_split_path = self.root_dir / "val_split.txt"
+
+        if not val_split_path.exists():
+            raise FileNotFoundError(
+                f"Validation split file not found: {val_split_path}\n"
+                "Run: python scripts/create_val_split.py"
+            )
+
+        val_split = pd.read_csv(
+            val_split_path,
+            sep=" ",
+            names=["image_id", "is_val"],
+        )
+        df = df.merge(val_split, on="image_id", how="left")
+        # Official test images are not in val_split.txt; keep them out of train/val filters.
+        df["is_val"] = df["is_val"].fillna(0).astype(int)
 
         if use_bbox_crop:
             boxes = pd.read_csv(
@@ -55,8 +81,10 @@ class CUBDataset(Dataset):
             df = df.merge(boxes, on="image_id")
 
         if split == "train":
-            df = df[df["is_train"] == 1]
-        elif split in ["val", "test"]:
+            df = df[(df["is_train"] == 1) & (df["is_val"] == 0)]
+        elif split == "val":
+            df = df[(df["is_train"] == 1) & (df["is_val"] == 1)]
+        elif split == "test":
             df = df[df["is_train"] == 0]
         else:
             raise ValueError("split must be 'train', 'val', or 'test'")

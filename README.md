@@ -9,6 +9,7 @@ Planned follow-ups include a web upload interface, inference API, and deployment
 ```
 birdbrain/
 ├── configs/                 # YAML training configs per model/stage
+├── splits/                  # val_split.txt (train/val holdout from official train)
 ├── data/raw/CUB_200_2011/   # Dataset metadata and images/
 ├── training/
 │   ├── config.py            # YAML config loader

@@ -54,6 +54,7 @@ def get_dataloaders(cfg: TrainConfig):
         split="train",
         transform=train_transform,
         use_bbox_crop=data.use_bbox_crop,
+        val_split_file=data.val_split_file,
     )
 
     val_dataset = CUBDataset(
@@ -61,6 +62,7 @@ def get_dataloaders(cfg: TrainConfig):
         split="val",
         transform=val_transform,
         use_bbox_crop=data.use_bbox_crop,
+        val_split_file=data.val_split_file,
     )
 
     train_loader = DataLoader(

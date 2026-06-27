@@ -141,6 +141,7 @@ def _log_params(cfg: TrainConfig, device):
         "unfreeze_blocks": cfg.training.unfreeze_blocks,
         "use_bbox_crop": cfg.data.use_bbox_crop,
         "augmentation": cfg.data.augmentation,
+        "val_split_file": str(cfg.data.val_split_file),
         "lr_scheduler_patience": cfg.training.scheduler.patience,
         "early_stopping_patience": cfg.training.early_stopping_patience or "",
         "device": str(device),
@@ -164,6 +165,16 @@ def train(cfg: TrainConfig):
         _log_params(cfg, device)
 
         train_loader, val_loader = get_dataloaders(cfg)
+
+        print(
+            f"Split sizes — train: {len(train_loader.dataset)}, "
+            f"val: {len(val_loader.dataset)} "
+            f"(official test held out for final eval)"
+        )
+        mlflow.log_params({
+            "train_split_size": len(train_loader.dataset),
+            "val_split_size": len(val_loader.dataset),
+        })
 
         model = build_model(cfg).to(device)
         prior_val_acc = load_checkpoint(model, cfg.model.checkpoint_path, device)

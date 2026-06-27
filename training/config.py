@@ -53,6 +53,7 @@ class DataConfig:
     use_bbox_crop: bool
     augmentation: str
     num_workers: int
+    val_split_file: Path
 
 
 @dataclass
