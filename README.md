@@ -146,6 +146,25 @@ python evaluate.py --config ../configs/efficientnet_stage5_bbox.yaml \
 
 Use `--split val` to re-score on the validation holdout. Add `--mlflow` to log the eval run. Writes a JSON report next to the checkpoint (e.g. `birdbrain_v1-4.eval.json`).
 
+### Confusion matrix analysis
+
+Standalone script for per-class errors — worst-recall bar chart, top-K submatrix heatmap, and confused pairs CSV. Run after training or evaluation:
+
+```bash
+cd training
+python confusion_matrix.py --config ../configs/resnet50_stage5_bbox.yaml \
+  --checkpoint ../models/birdbrain_resnet50_v1-4.pt --split test --top-k 20
+```
+
+Writes to `<checkpoint_stem>_confusion/` by default:
+
+- `worst_recall_bar.html` — open in a browser
+- `topk_submatrix.html` — K×K heatmap for worst classes
+- `confused_pairs.csv` — most common misclassification pairs
+- `per_class_recall.csv`, `confusion_matrix.csv`, `summary.json`
+
+Add `--normalize-rows` for a row-normalized submatrix heatmap.
+
 ## Experiment tracking (MLflow)
 
 Training runs are logged to a local SQLite database at `mlflow.db` (artifacts in `mlartifacts/`).
