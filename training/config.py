@@ -9,6 +9,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 ALLOWED_MODELS = {"efficientnet_b0", "resnet50"}
 ALLOWED_OPTIMIZERS = {"adam", "adamw", "sgd"}
 ALLOWED_AUGMENTATIONS = {"minimal", "standard", "strong"}
+ALLOWED_DATASETS = {"cub", "inat2021"}
 
 IMAGENET_NORMALIZE = {
     "mean": [0.485, 0.456, 0.406],
@@ -48,6 +49,7 @@ class TrainingConfig:
 
 @dataclass
 class DataConfig:
+    dataset: str
     data_dir: Path
     image_size: int
     use_bbox_crop: bool
@@ -142,6 +144,16 @@ def load_config(config_path: str | Path) -> TrainConfig:
             f"got {augmentation!r}"
         )
 
+    dataset = data_raw.get("dataset", "cub").lower()
+    if dataset not in ALLOWED_DATASETS:
+        raise ValueError(
+            f"data.dataset must be one of {sorted(ALLOWED_DATASETS)}, got {dataset!r}"
+        )
+
+    use_bbox_crop = bool(data_raw.get("use_bbox_crop", False))
+    if dataset == "inat2021" and use_bbox_crop:
+        raise ValueError("use_bbox_crop is not supported for dataset 'inat2021'")
+
     scheduler_raw = training_raw.get("scheduler", {})
     tracking_uri = mlflow_raw.get("tracking_uri")
     if tracking_uri is None:
@@ -186,16 +198,22 @@ def load_config(config_path: str | Path) -> TrainConfig:
             ),
         ),
         data=DataConfig(
+            dataset=dataset,
             data_dir=_resolve_path(
                 data_raw.get("data_dir", "data/raw/CUB_200_2011"),
                 project_root,
             ),
             image_size=int(data_raw.get("image_size", 224)),
-            use_bbox_crop=bool(data_raw.get("use_bbox_crop", False)),
+            use_bbox_crop=use_bbox_crop,
             augmentation=augmentation,
             num_workers=int(data_raw.get("num_workers", 4)),
             val_split_file=_resolve_path(
-                data_raw.get("val_split_file", "splits/val_split.txt"),
+                data_raw.get(
+                    "val_split_file",
+                    "splits/inat_val_split.txt"
+                    if dataset == "inat2021"
+                    else "splits/val_split.txt",
+                ),
                 project_root,
             ),
         ),

@@ -2,7 +2,7 @@ from torch.utils.data import DataLoader
 from torchvision import transforms
 
 from config import IMAGENET_NORMALIZE, TrainConfig
-from dataset import CUBDataset
+from datasets import CUBDataset, INat2021Dataset
 
 
 def _build_train_transform(augmentation: str, image_size: int):
@@ -44,26 +44,39 @@ def _build_val_transform(image_size: int):
     ])
 
 
+def _build_dataset(cfg: TrainConfig, split: str, transform, use_bbox_crop: bool | None = None):
+    data = cfg.data
+    if use_bbox_crop is None:
+        use_bbox_crop = data.use_bbox_crop
+
+    if data.dataset == "cub":
+        return CUBDataset(
+            root_dir=data.data_dir,
+            split=split,
+            transform=transform,
+            use_bbox_crop=use_bbox_crop,
+            val_split_file=data.val_split_file,
+        )
+
+    if data.dataset == "inat2021":
+        return INat2021Dataset(
+            root_dir=data.data_dir,
+            split=split,
+            transform=transform,
+            val_split_file=data.val_split_file,
+            skip_missing=True,
+        )
+
+    raise ValueError(f"Unsupported dataset: {data.dataset!r}")
+
+
 def get_dataloaders(cfg: TrainConfig):
     data = cfg.data
     train_transform = _build_train_transform(data.augmentation, data.image_size)
     val_transform = _build_val_transform(data.image_size)
 
-    train_dataset = CUBDataset(
-        root_dir=data.data_dir,
-        split="train",
-        transform=train_transform,
-        use_bbox_crop=data.use_bbox_crop,
-        val_split_file=data.val_split_file,
-    )
-
-    val_dataset = CUBDataset(
-        root_dir=data.data_dir,
-        split="val",
-        transform=val_transform,
-        use_bbox_crop=data.use_bbox_crop,
-        val_split_file=data.val_split_file,
-    )
+    train_dataset = _build_dataset(cfg, "train", train_transform)
+    val_dataset = _build_dataset(cfg, "val", val_transform)
 
     train_loader = DataLoader(
         train_dataset,
@@ -92,17 +105,8 @@ def get_eval_dataloader(
 ):
     """Deterministic loader for final evaluation (no augmentation)."""
     data = cfg.data
-    if use_bbox_crop is None:
-        use_bbox_crop = data.use_bbox_crop
-
     transform = _build_val_transform(data.image_size)
-    dataset = CUBDataset(
-        root_dir=data.data_dir,
-        split=split,
-        transform=transform,
-        use_bbox_crop=use_bbox_crop,
-        val_split_file=data.val_split_file,
-    )
+    dataset = _build_dataset(cfg, split, transform, use_bbox_crop=use_bbox_crop)
 
     loader = DataLoader(
         dataset,
