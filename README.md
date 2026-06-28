@@ -4,7 +4,7 @@ Bird species classifier trained on the [Caltech-UCSD Birds-200-2011 (CUB-200-201
 
 **Documentation:** See [`docs/`](docs/README.md) for pipeline architecture, data splits, models, evaluation, and config reference.
 
-Planned follow-ups include a web upload interface, inference API, and deployment to `birdbrain.djm-apps.com`.
+Planned follow-ups include deployment to `birdbrain.djm-apps.com` (SvelteKit frontend in `web/`, FastAPI in `api/`).
 
 ## Project structure
 
@@ -12,6 +12,8 @@ Planned follow-ups include a web upload interface, inference API, and deployment
 birdbrain/
 ├── configs/                 # YAML training configs per model/stage
 ├── docs/                    # Technical documentation (pipeline, data, models, eval)
+├── web/                     # SvelteKit frontend (Identify, About, Docs, Citation)
+├── api/                     # Planned FastAPI inference service
 ├── splits/                  # val_split.txt (train/val holdout from official train)
 ├── data/raw/CUB_200_2011/   # Dataset metadata and images/
 ├── training/
@@ -169,6 +171,29 @@ Writes to `<checkpoint_stem>_confusion/` by default:
 - `per_class_recall.csv`, `confusion_matrix.csv`, `summary.json`
 
 Add `--normalize-rows` for a row-normalized submatrix heatmap.
+
+## Web frontend
+
+SvelteKit app in [`web/`](web/README.md) — upload UI with model picker, about, docs, and citation pages.
+
+Terminal 1 — API (from repo root):
+
+```bash
+pip install -r requirements.txt -r api/requirements.txt
+uvicorn api.main:app --reload --port 8000
+```
+
+Terminal 2 — frontend:
+
+```bash
+cd web
+npm install
+npm run dev
+```
+
+Open http://localhost:5173 (Vite proxies `/api` to the API on port 8000).
+
+See [`api/README.md`](api/README.md) for endpoints and configuration.
 
 ## Experiment tracking (MLflow)
 

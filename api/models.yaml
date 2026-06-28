@@ -1,0 +1,11 @@
+models:
+  - id: efficientnet_b0
+    name: EfficientNet-B0
+    checkpoint: models/birdbrain_v1-4.pt
+    description: Lightweight backbone; ~77% val on CUB
+    default: true
+
+  - id: resnet50
+    name: ResNet-50
+    checkpoint: models/birdbrain_resnet50_v1-4.pt
+    description: Deeper backbone; strong fine-grained features

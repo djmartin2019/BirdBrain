@@ -94,20 +94,31 @@ Eval scripts read `use_bbox_crop` and `model_name` from the checkpoint first, fa
 
 CUB folder names like `015.Red_winged_Blackbird` become `Red winged Blackbird`.
 
-## Planned inference output
+## Inference API
 
-When the API is built, responses should match this shape (from README):
+Upload inference is implemented in [`training/inference.py`](../training/inference.py) and served by [`api/`](../api/README.md).
+
+### Preprocessing
+
+User uploads use eval transforms from [`dataloaders.py`](../training/dataloaders.py): resize → center crop → ImageNet normalize, using `image_size` and `normalization` from the checkpoint.
+
+**Bounding boxes:** Stage-5 checkpoints store `use_bbox_crop: true`, but arbitrary uploads have no CUB bbox metadata. The API **skips bbox crop** and runs on the full image. CUB test/val eval still uses bbox when the checkpoint flag is set.
+
+### Response shape
+
+`POST /api/predict` returns top-5 softmax percentages (0–100):
 
 ```json
 {
+  "model_id": "efficientnet_b0",
+  "model_name": "EfficientNet-B0",
   "prediction": "Cardinal",
-  "confidence": 0.94,
+  "confidence": 94.2,
   "top_5": [
-    ["Cardinal", 0.94],
-    ["Scarlet Tanager", 0.03],
-    ["Summer Tanager", 0.02]
+    { "species": "Cardinal", "percent": 94.2 },
+    { "species": "Scarlet Tanager", "percent": 3.1 }
   ]
 }
 ```
 
-Production inference must use the same `image_size`, normalization, and `use_bbox_crop` setting stored in the checkpoint.
+Users choose between the two production models via `GET /api/models` (see [`api/models.yaml`](../api/models.yaml)).

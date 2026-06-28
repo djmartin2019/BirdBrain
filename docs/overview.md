@@ -34,9 +34,9 @@ flowchart TB
     MLflow --> UI[MLflow UI browser]
   end
 
-  subgraph planned [Planned]
-    CKPT --> API[Inference API]
-    API --> Web[birdbrain.djm-apps.com]
+  subgraph planned [Planned / in progress]
+    CKPT --> API[api/ FastAPI]
+    API --> Web[web/ SvelteKit → birdbrain.djm-apps.com]
     API --> PG[(Postgres predictions)]
   end
 ```
@@ -62,6 +62,8 @@ birdbrain/
 ├── mlflow.db             # Experiment tracking DB (gitignored)
 ├── mlartifacts/          # MLflow artifact store (gitignored)
 ├── docs/                 # This documentation
+├── web/                  # SvelteKit frontend (Identify, About, Docs, Citation)
+├── api/                  # Planned FastAPI inference service
 └── db/schema.sql         # Planned Postgres schema for production predictions
 ```
 
@@ -84,7 +86,7 @@ Both use the same five-stage progression: head-only → progressive unfreezing �
 
 ## What is not built yet
 
-- HTTP inference API
-- Web upload UI at `birdbrain.djm-apps.com`
+- FastAPI inference service (`api/` — README only)
+- Wiring upload UI to live predictions (frontend exists in `web/`)
 - Postgres prediction logging (schema stub exists in `db/schema.sql`)
 - MLflow Model Registry / production deployment hooks
