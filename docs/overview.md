@@ -58,12 +58,13 @@ birdbrain/
 ├── scripts/              # create_val_split.py
 ├── data/raw/CUB_200_2011/  # Dataset (gitignored)
 ├── training/             # All Python training/eval code
-├── models/               # Checkpoints, labels.json, analysis output (gitignored)
+├── models/               # Training checkpoints and analysis output (gitignored)
+├── prod-models/          # Production inference checkpoints (weights gitignored)
 ├── mlflow.db             # Experiment tracking DB (gitignored)
 ├── mlartifacts/          # MLflow artifact store (gitignored)
 ├── docs/                 # This documentation
 ├── web/                  # SvelteKit frontend (Identify, About, Docs, Citation)
-├── api/                  # Planned FastAPI inference service
+├── api/                  # FastAPI inference service
 └── db/schema.sql         # Planned Postgres schema for production predictions
 ```
 

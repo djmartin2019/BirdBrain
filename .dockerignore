@@ -1,0 +1,42 @@
+# Git
+.git
+.gitignore
+
+# Python
+.venv
+venv
+__pycache__
+*.py[cod]
+*.egg-info
+.pytest_cache
+.mypy_cache
+
+# Training outputs (mounted at runtime)
+models/
+prod-models/
+mlruns/
+mlflow.db
+mlartifacts/
+data/
+
+# Web
+web/node_modules
+web/.svelte-kit
+web/build
+web/.env
+web/.env.*
+
+# OS / IDE
+.DS_Store
+.cursor
+*.md
+!README.md
+!api/README.md
+
+# Docs and configs not needed in runtime images
+docs/
+configs/
+splits/
+scripts/
+db/
+training-data/

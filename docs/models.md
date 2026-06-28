@@ -80,6 +80,10 @@ Saved by `trainer.save_checkpoint()` to `model.output_path` (e.g. `models/birdbr
 
 Eval scripts read `use_bbox_crop` and `model_name` from the checkpoint first, falling back to config.
 
+### Production deployment
+
+Training writes all stages to `models/`. Promoted inference checkpoints live in [`prod-models/`](../prod-models/README.md) and are mounted into the API container at runtime (see [`api/models.yaml`](../api/models.yaml)).
+
 ## Label map
 
 [`make_labels.py`](../training/make_labels.py) exports class index → display name:

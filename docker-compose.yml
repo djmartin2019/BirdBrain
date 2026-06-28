@@ -1,0 +1,21 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    volumes:
+      - ./prod-models:/app/prod-models:ro
+    restart: unless-stopped
+    expose:
+      - "8000"
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.web
+    ports:
+      - "${BIRDBRAIN_PORT:-3012}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped

@@ -16,6 +16,7 @@ build/
 
 # Training outputs
 models/
+prod-models/*.pt
 mlruns/
 mlflow.db
 mlartifacts/

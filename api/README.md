@@ -53,8 +53,8 @@ Configured in [`models.yaml`](models.yaml). Checkpoints are loaded eagerly at st
 
 | `id` | Checkpoint |
 |------|------------|
-| `efficientnet_b0` | `models/birdbrain_v1-4.pt` |
-| `resnet50` | `models/birdbrain_resnet50_v1-4.pt` |
+| `efficientnet_b0` | `prod-models/birdbrain_v1-4.pt` |
+| `resnet50` | `prod-models/birdbrain_resnet50_v1-4.pt` |
 
 ## Upload preprocessing note
 
@@ -98,11 +98,21 @@ cd web && npm run dev
 
 Open http://localhost:5173
 
+## Docker
+
+Production-style stack with nginx + API (default port **3012**):
+
+```bash
+docker compose up --build
+```
+
+Requires `./prod-models/` checkpoints mounted at runtime (see [`prod-models/README.md`](../prod-models/README.md)). The Docker image uses [`labels.json`](labels.json) for class names (no CUB dataset mount needed).
+
 ## Environment variables
 
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `BIRDBRAIN_MODELS_CONFIG` | `api/models.yaml` | Model registry |
-| `BIRDBRAIN_LABELS_PATH` | `models/labels.json` | Class name map |
+| `BIRDBRAIN_LABELS_PATH` | `models/labels.json` (local) / `api/labels.json` (Docker) | Class name map |
 | `BIRDBRAIN_DATA_DIR` | `data/raw/CUB_200_2011` | CUB path for `classes.txt` fallback |
 | `BIRDBRAIN_MAX_UPLOAD_MB` | `10` | Max upload size |

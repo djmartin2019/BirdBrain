@@ -13,7 +13,9 @@ birdbrain/
 ├── configs/                 # YAML training configs per model/stage
 ├── docs/                    # Technical documentation (pipeline, data, models, eval)
 ├── web/                     # SvelteKit frontend (Identify, About, Docs, Citation)
-├── api/                     # Planned FastAPI inference service
+├── api/                     # FastAPI inference service (+ Docker image)
+├── docker/                  # nginx config and web production Dockerfile
+├── docker-compose.yml       # Run web + API (port 3012 by default)
 ├── splits/                  # val_split.txt (train/val holdout from official train)
 ├── data/raw/CUB_200_2011/   # Dataset metadata and images/
 ├── training/
@@ -26,7 +28,8 @@ birdbrain/
 │   ├── evaluate.py          # Checkpoint eval on val/test
 │   ├── confusion_matrix.py  # Per-class analysis and Plotly charts
 │   └── make_labels.py       # Export class index → readable name map
-├── models/                  # Saved checkpoints and labels.json (created at runtime)
+├── models/                  # Training checkpoints and analysis output (gitignored)
+├── prod-models/             # Production inference checkpoints only (weights gitignored)
 ├── mlflow.db                # MLflow experiment tracking (created at runtime)
 ├── mlartifacts/             # MLflow run artifacts (created at runtime)
 ├── db/schema.sql            # Postgres schema for prediction logging (planned)
@@ -194,6 +197,51 @@ npm run dev
 Open http://localhost:5173 (Vite proxies `/api` to the API on port 8000).
 
 See [`api/README.md`](api/README.md) for endpoints and configuration.
+
+## Docker (production)
+
+Run the static frontend and inference API together with nginx on port **3012**:
+
+```bash
+# Ensure production checkpoints exist in prod-models/ (see prod-models/README.md)
+docker compose up --build
+```
+
+Open http://localhost:3012
+
+The `web` service serves the SvelteKit build and proxies `/api` to the API container. Production checkpoints are mounted read-only from `./prod-models`. Class names are baked into the API image via [`api/labels.json`](api/labels.json).
+
+After retraining, promote checkpoints with `./scripts/sync-prod-models.sh` (copies final `.pt` files from `models/`).
+
+Override the host port:
+
+```bash
+BIRDBRAIN_PORT=3012 docker compose up --build
+```
+
+Stop and remove containers:
+
+```bash
+docker compose down
+```
+
+### Deployment scripts (VPS)
+
+From the repo root on the server:
+
+```bash
+chmod +x scripts/deploy-full.sh scripts/deploy-web.sh   # once
+```
+
+| Script | When to use |
+|--------|-------------|
+| `./scripts/deploy-full.sh` | First deploy, API changes, dependency updates |
+| `./scripts/deploy-full.sh --no-cache` | Same, but ignore Docker cache (slow) |
+| `./scripts/deploy-web.sh` | Frontend-only changes (pages, styles, copy) |
+
+Both scripts run `git pull --ff-only`, then the appropriate `docker compose` build/up commands. Copy [`.env.example`](.env.example) to `.env` on the server to set `BIRDBRAIN_PORT=3012`.
+
+Ship `prod-models/*.pt` to the VPS separately (rsync); weights are not in git. Use `./scripts/sync-prod-models.sh` locally after promoting new checkpoints from `models/`.
 
 ## Experiment tracking (MLflow)
 
