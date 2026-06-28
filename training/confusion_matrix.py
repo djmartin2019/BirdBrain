@@ -21,6 +21,52 @@ from dataloaders import get_eval_dataloader
 from models import build_model_for_inference
 from trainer import get_device
 
+DARK_THEME = {
+    "template": "plotly_dark",
+    "paper_bgcolor": "#111827",
+    "plot_bgcolor": "#1f2937",
+    "font": {"color": "#e5e7eb", "size": 11},
+    "title": {"font": {"color": "#f9fafb", "size": 16}},
+}
+
+
+def _apply_dark_theme(fig, height=None, width=None, left_margin=200):
+    layout = {**DARK_THEME, "margin": {"l": left_margin, "r": 50, "t": 70, "b": 70}}
+    if height is not None:
+        layout["height"] = height
+    if width is not None:
+        layout["width"] = width
+    fig.update_layout(**layout)
+    fig.update_xaxes(gridcolor="#374151", zerolinecolor="#374151", linecolor="#4b5563")
+    fig.update_yaxes(gridcolor="#374151", zerolinecolor="#374151", linecolor="#4b5563")
+
+
+def _set_all_category_ticks(fig, labels: list[str], x_angle: int = -45, font_size: int = 9):
+    """Force every category label on heatmap axes via numeric tick positions."""
+    n = len(labels)
+    tickvals = list(range(n))
+    tick_cfg = dict(
+        tickmode="array",
+        tickvals=tickvals,
+        ticktext=labels,
+        tickfont=dict(size=font_size),
+    )
+    fig.update_xaxes(**tick_cfg, tickangle=x_angle, side="top")
+    fig.update_yaxes(**tick_cfg, autorange="reversed")
+
+
+def select_worst_classes(recall_df: pd.DataFrame, top_k: int) -> pd.DataFrame:
+    """Pick worst-K classes by recall among those present in the split."""
+    present = recall_df[recall_df["support"] > 0].copy()
+    if present.empty:
+        return present
+
+    return (
+        present.sort_values(["recall", "support"], ascending=[True, False])
+        .head(top_k)
+        .sort_values("recall", ascending=True)
+        .reset_index(drop=True)
+    )
 
 def load_class_names(labels_path: Path | None, data_dir: Path, num_classes: int) -> dict[int, str]:
     """Load index -> class name map from labels.json or CUB classes.txt."""
@@ -110,27 +156,39 @@ def compute_confused_pairs(
 
 def plot_worst_recall_bar(recall_df: pd.DataFrame, top_k: int, output_path: Path):
     """Horizontal bar chart of worst-K classes by recall."""
-    worst = recall_df.nsmallest(top_k, "recall").sort_values("recall", ascending=True)
-    worst = worst.copy()
-    worst["hover"] = worst.apply(
-        lambda r: f"{r['class_name']}<br>Recall: {r['recall']:.1%}<br>Support: {int(r['support'])}",
-        axis=1,
-    )
+    worst = select_worst_classes(recall_df, top_k)
+    if worst.empty:
+        raise ValueError("No classes with support > 0 found for bar chart")
+
+    class_names = worst["class_name"].tolist()
+    left_margin = max(200, max((len(n) for n in class_names), default=10) * 7)
+    text_labels = [f"{r:.1%}" for r in worst["recall"]]
 
     fig = px.bar(
         worst,
         x="recall",
         y="class_name",
         orientation="h",
-        title=f"Worst {top_k} Classes by Recall",
+        title=f"Worst {len(worst)} Classes by Recall (support > 0)",
         labels={"recall": "Recall", "class_name": "Class"},
-        hover_name="class_name",
-        custom_data=["support"],
+        text=text_labels,
+        color_discrete_sequence=["#60a5fa"],
     )
     fig.update_traces(
-        hovertemplate="%{y}<br>Recall: %{x:.1%}<br>Support: %{customdata[0]}<extra></extra>"
+        hovertemplate="%{y}<br>Recall: %{x:.1%}<br>Support: %{customdata[0]}<extra></extra>",
+        customdata=worst[["support"]].values,
+        textposition="outside",
+        cliponaxis=False,
     )
-    fig.update_layout(height=max(400, top_k * 22), yaxis={"categoryorder": "total ascending"})
+    fig.update_yaxes(
+        categoryorder="array",
+        categoryarray=class_names,
+        tickfont=dict(size=10),
+        automargin=True,
+    )
+    x_max = max(0.35, float(worst["recall"].max()) * 1.2)
+    fig.update_xaxes(range=[0, x_max])
+    _apply_dark_theme(fig, height=max(400, len(worst) * 32), left_margin=left_margin)
     fig.write_html(str(output_path))
 
 
@@ -153,20 +211,22 @@ def plot_topk_submatrix(
         title_suffix = ""
 
     labels = [class_names.get(i, str(i)) for i in class_indices]
+    k = len(labels)
+    px_size = max(32, min(40, 800 // k))
+    chart_size = max(600, k * px_size)
+    tickvals = list(range(k))
+
     fig = px.imshow(
         sub,
-        x=labels,
-        y=labels,
+        x=tickvals,
+        y=tickvals,
         labels={"x": "Predicted", "y": "True", "color": color_label},
-        title=f"Top-{len(class_indices)} Worst-Recall Submatrix{title_suffix}",
+        title=f"Top-{k} Worst-Recall Submatrix{title_suffix}",
         aspect="auto",
         color_continuous_scale="Blues",
     )
-    fig.update_layout(
-        height=max(500, len(class_indices) * 24),
-        width=max(600, len(class_indices) * 24),
-        xaxis={"tickangle": -45, "side": "top"},
-    )
+    _set_all_category_ticks(fig, labels, x_angle=-45, font_size=max(8, min(10, 200 // k)))
+    _apply_dark_theme(fig, height=chart_size, width=chart_size, left_margin=chart_size // 3)
     fig.write_html(str(output_path))
 
 
@@ -216,7 +276,8 @@ def run_confusion_analysis(
     recall_df = compute_per_class_recall(cm, class_names)
     confused_pairs_df = compute_confused_pairs(cm, class_names, pairs_top_n)
 
-    worst_indices = recall_df.nsmallest(top_k, "recall")["class_index"].tolist()
+    worst_df = select_worst_classes(recall_df, top_k)
+    worst_indices = worst_df["class_index"].tolist()
 
     cm_path = output_dir / "confusion_matrix.csv"
     cm_df = pd.DataFrame(cm, index=labels, columns=labels)
