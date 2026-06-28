@@ -8,7 +8,8 @@
 	<h2>What it does</h2>
 	<p>
 		Given a bird photo, the model predicts one of 200 North American species and returns a
-		confidence score plus the top five candidates. Training uses transfer learning with
+		confidence score plus the top five candidates. See the full
+		<a href="/species">supported species list</a>. Training uses transfer learning with
 		ImageNet-pretrained backbones (EfficientNet-B0 and ResNet50) and a five-stage fine-tuning
 		pipeline.
 	</p>

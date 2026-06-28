@@ -7,6 +7,7 @@ SvelteKit frontend for [birdbrain.djm-apps.com](https://birdbrain.djm-apps.com).
 | Path | Page |
 |------|------|
 | `/` | Upload + identify (calls `/api/predict`) |
+| `/species` | Searchable list of 200 CUB-200 species the models recognize |
 | `/about` | Project overview |
 | `/docs` | User docs + links to repo `docs/` |
 | `/citation` | CUB-200-2011 citation |
