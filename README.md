@@ -2,6 +2,8 @@
 
 Bird species classifier trained on the [Caltech-UCSD Birds-200-2011 (CUB-200-2011)](https://www.vision.caltech.edu/datasets/cub_200_2011/) dataset. Supports EfficientNet-B0 and ResNet50 with YAML-driven staged training.
 
+**Documentation:** See [`docs/`](docs/README.md) for pipeline architecture, data splits, models, evaluation, and config reference.
+
 Planned follow-ups include a web upload interface, inference API, and deployment to `birdbrain.djm-apps.com`.
 
 ## Project structure
@@ -9,6 +11,7 @@ Planned follow-ups include a web upload interface, inference API, and deployment
 ```
 birdbrain/
 ├── configs/                 # YAML training configs per model/stage
+├── docs/                    # Technical documentation (pipeline, data, models, eval)
 ├── splits/                  # val_split.txt (train/val holdout from official train)
 ├── data/raw/CUB_200_2011/   # Dataset metadata and images/
 ├── training/
@@ -18,6 +21,8 @@ birdbrain/
 │   ├── train.py             # CLI entry point
 │   ├── dataset.py           # PyTorch Dataset for CUB
 │   ├── dataloaders.py       # Augmentation presets and DataLoaders
+│   ├── evaluate.py          # Checkpoint eval on val/test
+│   ├── confusion_matrix.py  # Per-class analysis and Plotly charts
 │   └── make_labels.py       # Export class index → readable name map
 ├── models/                  # Saved checkpoints and labels.json (created at runtime)
 ├── mlflow.db                # MLflow experiment tracking (created at runtime)
