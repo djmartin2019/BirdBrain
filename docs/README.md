@@ -14,6 +14,7 @@ For quick setup and commands, see the [project README](../README.md).
 | [Models](models.md) | EfficientNet-B0 & ResNet50, freeze policy, checkpoints |
 | [Evaluation & analysis](evaluation-and-analysis.md) | `evaluate.py`, confusion matrix reports, metrics display |
 | [Config reference](config-reference.md) | YAML field definitions and stage templates |
+| [Citation & use](citation.md) | Dataset citations, BibTeX, research/educational use |
 
 ## Typical workflow
 

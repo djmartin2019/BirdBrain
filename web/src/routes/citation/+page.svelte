@@ -1,21 +1,32 @@
 <script lang="ts">
-	const bibtex = `@techreport{WelinderEtal2010,
+	const cubBibtex = `@techreport{WelinderEtal2010,
   Author = {C. Wah and S. Branson and P. Welinder and P. Perona and S. Belongie},
   Title = {Caltech-UCSD Birds-200-2011},
   Institution = {California Institute of Technology},
   Year = {2011},
   Number = {CNS-TR-2011-001}
 }`;
+
+	const inatBibtex = `@misc{inaturalist2021,
+  author = {Grant Van Horn and macaodha},
+  title = {iNat Challenge 2021 - {FGVC8}},
+  howpublished = {\\url{https://kaggle.com/competitions/inaturalist-2021}},
+  year = {2021},
+  publisher = {Kaggle}
+}`;
 </script>
 
 <h1 class="page-title">Citation</h1>
 <p class="lead">
-	Birdbrain is trained on the Caltech-UCSD Birds-200-2011 dataset. If you use the dataset or
+	Birdbrain is for non-commercial research and educational use only. If you use the datasets or
 	this project in published work, please cite the sources below.
 </p>
 
 <section class="card">
 	<h2>CUB-200-2011 dataset</h2>
+	<p class="muted">
+		Production models and the current web classifier are trained on CUB-200-2011.
+	</p>
 	<blockquote>
 		<p>
 			<strong>The Caltech-UCSD Birds-200-2011 Dataset</strong><br />
@@ -37,8 +48,33 @@
 </section>
 
 <section class="card">
-	<h2>BibTeX (dataset)</h2>
-	<pre><code>{bibtex}</code></pre>
+	<h2>iNaturalist 2021 dataset</h2>
+	<p class="muted">
+		iNat training experiments use the FGVC8 challenge data; Birdbrain filters to birds (Aves) only.
+	</p>
+	<blockquote>
+		<p>
+			Grant Van Horn and macaodha. <strong>iNat Challenge 2021 - FGVC8</strong>.<br />
+			<a href="https://kaggle.com/competitions/inaturalist-2021">
+				https://kaggle.com/competitions/inaturalist-2021
+			</a>, 2021. Kaggle.
+		</p>
+	</blockquote>
+	<p class="muted">
+		Follow the Kaggle competition and iNaturalist dataset terms. This project uses the data for
+		research and educational fine-tuning only—not for commercial products or redistribution of
+		the raw images.
+	</p>
+</section>
+
+<section class="card">
+	<h2>BibTeX (CUB)</h2>
+	<pre><code>{cubBibtex}</code></pre>
+</section>
+
+<section class="card">
+	<h2>BibTeX (iNat 2021)</h2>
+	<pre><code>{inatBibtex}</code></pre>
 </section>
 
 <section class="card">
@@ -49,3 +85,7 @@
 		weights.
 	</p>
 </section>
+
+<p class="muted">
+	Full citations and use notes are also in the repository at <code>docs/citation.md</code>.
+</p>

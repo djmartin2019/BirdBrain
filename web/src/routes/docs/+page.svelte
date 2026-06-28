@@ -29,6 +29,7 @@
 		<li><strong>Models</strong> — architectures, checkpoints, freeze policy</li>
 		<li><strong>Evaluation &amp; analysis</strong> — <code>evaluate.py</code>, confusion matrix reports</li>
 		<li><strong>Config reference</strong> — YAML fields per stage</li>
+		<li><strong>Citation &amp; use</strong> — dataset citations, research/educational terms</li>
 	</ul>
 	<p class="muted">
 		Clone the repository and open <code>docs/README.md</code> for the full index.

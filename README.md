@@ -275,9 +275,4 @@ Class names in training follow CUB naming (for example, `Cardinal` rather than `
 
 ## Dataset citation
 
-This project uses the [Caltech-UCSD Birds-200-2011](https://www.vision.caltech.edu/datasets/cub_200_2011/) dataset. If you use it in published work, please cite:
-
-> **The Caltech-UCSD Birds-200-2011 Dataset**  
-> Wah, C.; Branson, S.; Welinder, P.; Perona, P.; Belongie, S.  
-> California Institute of Technology, 2011.  
-> Technical Report CNS-TR-2011-001
+See [docs/citation.md](docs/citation.md) for CUB-200-2011 and iNaturalist 2021 citations, BibTeX, and research/educational use terms.

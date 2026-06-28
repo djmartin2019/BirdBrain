@@ -172,3 +172,5 @@ Implemented in [`training/datasets/inat2021.py`](../training/datasets/inat2021.p
 7. Return `(tensor, label)` where label is **0–1485**
 
 Bounding box crop is not available for iNat (no bbox annotations). Config validation rejects `use_bbox_crop: true` when `dataset: inat2021`.
+
+See [Citation & use](citation.md) for iNat 2021 attribution and license notes.

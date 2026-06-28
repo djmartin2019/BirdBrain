@@ -10,7 +10,7 @@ SvelteKit frontend for [birdbrain.djm-apps.com](https://birdbrain.djm-apps.com).
 | `/species` | Searchable list of 200 CUB-200 species the models recognize |
 | `/about` | Project overview |
 | `/docs` | User docs + links to repo `docs/` |
-| `/citation` | CUB-200-2011 citation |
+| `/citation` | CUB-200-2011 and iNaturalist 2021 citations |
 
 ## Development
 
