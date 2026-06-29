@@ -14,11 +14,25 @@
 
 <h1 class="page-title">Supported species</h1>
 <p class="lead">
-	Birdbrain classifies photos among {SPECIES_COUNT} bird species from the
-	<a href="https://www.vision.caltech.edu/datasets/cub_200_2011/">Caltech-UCSD Birds-200-2011</a>
-	dataset. Both production models (EfficientNet-B0 and ResNet-50) were trained on this same label
-	set.
+	Birdbrain covers {SPECIES_COUNT.toLocaleString()} bird species drawn from
+	<a href="https://www.vision.caltech.edu/datasets/cub_200_2011/">CUB-200-2011</a> and the
+	<a href="https://kaggle.com/competitions/inaturalist-2021">iNaturalist 2021</a> challenge
+	(birds only). Overlapping names are listed once.
 </p>
+
+<section class="card">
+	<h2>Which model uses which species?</h2>
+	<ul>
+		<li>
+			<strong>BirdBrain Voyager</strong> — {SPECIES_COUNT.toLocaleString()} combined species (CUB +
+			iNat)
+		</li>
+		<li>
+			<strong>EfficientNet-B0</strong> and <strong>ResNet-50</strong> — 200 North American
+			species (CUB-200)
+		</li>
+	</ul>
+</section>
 
 <section class="card">
 	<label class="search-label" for="species-search">Search species</label>
@@ -45,8 +59,8 @@
 </section>
 
 <p class="muted footer-note">
-	Names follow the CUB-200 display convention (folder names with underscores replaced by spaces).
-	See the <a href="/citation">citation page</a> to credit the dataset.
+	Names use each dataset's common-name convention. CUB display names are kept when a species
+	appears in both lists. See the <a href="/citation">citation page</a> to credit the datasets.
 </p>
 
 <style>

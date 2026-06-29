@@ -12,7 +12,7 @@
 	<title>Birdbrain</title>
 	<meta
 		name="description"
-		content="Identify North American bird species from photos using a CUB-200 trained classifier."
+		content="Identify bird species from photos. BirdBrain Voyager covers 1,535 combined species; CUB models cover 200 North American species."
 	/>
 </svelte:head>
 
@@ -32,5 +32,5 @@
 <main>{@render children()}</main>
 
 <footer class="site-footer">
-	<p>Birdbrain — CUB-200-2011 classifier · Non-commercial research use</p>
+	<p>Birdbrain — bird species classifier · Non-commercial research use</p>
 </footer>

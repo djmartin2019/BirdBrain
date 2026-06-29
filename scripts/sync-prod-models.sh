@@ -8,7 +8,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
-SRC=("$ROOT/models/birdbrain_v1-4.pt" "$ROOT/models/birdbrain_resnet50_v1-4.pt")
+SRC=("$ROOT/models/birdbrain_inat_v1-3.pt" "$ROOT/models/birdbrain_v1-4.pt" "$ROOT/models/birdbrain_resnet50_v1-4.pt")
 DEST="$ROOT/prod-models"
 
 mkdir -p "$DEST"

@@ -1,11 +1,20 @@
 models:
+  - id: birdbrain_voyager
+    name: BirdBrain Voyager
+    checkpoint: prod-models/birdbrain_inat_v1-3.pt
+    labels: api/inat_labels.json
+    description: Global bird specialist — 1,535 combined species
+    default: true
+
   - id: efficientnet_b0
     name: EfficientNet-B0
     checkpoint: prod-models/birdbrain_v1-4.pt
-    description: Lightweight backbone; ~77% val on CUB
-    default: true
+    labels: api/labels.json
+    description: Lightweight backbone; 200 North American species
+    default: false
 
   - id: resnet50
     name: ResNet-50
     checkpoint: prod-models/birdbrain_resnet50_v1-4.pt
+    labels: api/labels.json
     description: Deeper backbone; strong fine-grained features

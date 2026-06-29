@@ -25,7 +25,8 @@
 <section class="card">
 	<h2>CUB-200-2011 dataset</h2>
 	<p class="muted">
-		Production models and the current web classifier are trained on CUB-200-2011.
+		EfficientNet-B0 and ResNet-50 CUB models use CUB-200-2011. BirdBrain Voyager uses the
+		iNaturalist 2021 birds subset.
 	</p>
 	<blockquote>
 		<p>

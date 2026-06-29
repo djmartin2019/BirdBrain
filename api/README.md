@@ -18,7 +18,7 @@ FastAPI inference service for the bird classifier. Loads production checkpoints 
     {
       "id": "efficientnet_b0",
       "name": "EfficientNet-B0",
-      "description": "Lightweight backbone; ~77% val on CUB",
+      "description": "Lightweight backbone; 200 North American species",
       "default": true
     }
   ]
@@ -51,10 +51,13 @@ Percentages are softmax probabilities × 100 (sum ≈ 100).
 
 Configured in [`models.yaml`](models.yaml). Checkpoints are loaded eagerly at startup. If a checkpoint file is missing, that model is omitted from `/api/models` (the service still starts).
 
-| `id` | Checkpoint |
-|------|------------|
-| `efficientnet_b0` | `prod-models/birdbrain_v1-4.pt` |
-| `resnet50` | `prod-models/birdbrain_resnet50_v1-4.pt` |
+Each model may specify its own `labels` JSON; otherwise `BIRDBRAIN_LABELS_PATH` is used as a fallback.
+
+| `id` | Checkpoint | Labels |
+|------|------------|--------|
+| `birdbrain_voyager` | `prod-models/birdbrain_inat_v1-3.pt` | `api/inat_labels.json` |
+| `efficientnet_b0` | `prod-models/birdbrain_v1-4.pt` | `api/labels.json` (200 CUB species) |
+| `resnet50` | `prod-models/birdbrain_resnet50_v1-4.pt` | `api/labels.json` (200 CUB species) |
 
 ## Upload preprocessing note
 
@@ -113,6 +116,6 @@ Requires `./prod-models/` checkpoints mounted at runtime (see [`prod-models/READ
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `BIRDBRAIN_MODELS_CONFIG` | `api/models.yaml` | Model registry |
-| `BIRDBRAIN_LABELS_PATH` | `models/labels.json` (local) / `api/labels.json` (Docker) | Class name map |
+| `BIRDBRAIN_LABELS_PATH` | `models/labels.json` (local) / `api/labels.json` (Docker) | Default class name map when a model entry has no `labels` field |
 | `BIRDBRAIN_DATA_DIR` | `data/raw/CUB_200_2011` | CUB path for `classes.txt` fallback |
 | `BIRDBRAIN_MAX_UPLOAD_MB` | `10` | Max upload size |

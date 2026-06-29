@@ -29,6 +29,7 @@ class ModelEntry:
     name: str
     description: str
     checkpoint: Path
+    labels_path: Path | None
     default: bool
     best_val_acc: float | None = None
 
@@ -45,7 +46,6 @@ class ModelCache:
         self.device = get_device()
         self.entries: list[ModelEntry] = []
         self.loaded: dict[str, LoadedModel] = {}
-        self.class_names: dict[int, str] = {}
 
     def configure(
         self,
@@ -57,9 +57,6 @@ class ModelCache:
         if not self.entries:
             logger.warning("No model entries found in %s", models_config)
             return
-
-        num_classes = 200
-        self.class_names = load_class_names(labels_path, data_dir, num_classes)
 
         for entry in self.entries:
             if not entry.checkpoint.exists():
@@ -75,8 +72,9 @@ class ModelCache:
                 if entry.best_val_acc is None and checkpoint.best_val_acc is not None:
                     entry.best_val_acc = checkpoint.best_val_acc
 
-                names = self.class_names or load_class_names(
-                    None, data_dir, checkpoint.num_classes
+                model_labels_path = entry.labels_path or labels_path
+                names = load_class_names(
+                    model_labels_path, data_dir, checkpoint.num_classes
                 )
                 self.loaded[entry.id] = LoadedModel(
                     entry=entry,
@@ -101,11 +99,13 @@ def load_registry(config_path: Path) -> list[ModelEntry]:
 
     entries: list[ModelEntry] = []
     for item in raw.get("models", []):
+        labels = item.get("labels")
         entries.append(
             ModelEntry(
                 id=item["id"],
                 name=item["name"],
                 checkpoint=_resolve_path(item["checkpoint"]),
+                labels_path=_resolve_path(labels) if labels else None,
                 description=item.get("description", ""),
                 default=bool(item.get("default", False)),
                 best_val_acc=item.get("best_val_acc"),

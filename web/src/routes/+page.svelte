@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { listModels, predict, type ModelInfo, type PredictionResponse } from '$lib/api';
+	import { listModels, predict, validateImageFile, type ModelInfo, type PredictionResponse } from '$lib/api';
+	import { SPECIES_COUNT } from '$lib/species';
 
 	let file = $state<File | null>(null);
 	let previewUrl = $state<string | null>(null);
@@ -34,7 +35,7 @@
 
 		file = selected;
 		result = null;
-		error = null;
+		error = selected ? validateImageFile(selected) : null;
 		previewUrl = selected ? URL.createObjectURL(selected) : null;
 	}
 
@@ -58,8 +59,9 @@
 
 <h1 class="page-title">Identify a bird</h1>
 <p class="lead">
-	Upload a photo to classify it among 200 CUB-200 species. Choose a model, then submit your
-	image for top-5 predictions.
+	Upload a photo for top-5 species predictions. <strong>BirdBrain Voyager</strong> covers
+	{SPECIES_COUNT.toLocaleString()} combined species; the CUB-trained models focus on 200 North
+	American species. See the full <a href="/species">species list</a>.
 </p>
 
 <form class="card" onsubmit={onSubmit}>
@@ -98,7 +100,7 @@
 	{#if previewUrl}
 		<img src={previewUrl} alt="Uploaded bird preview" style="max-width: 100%; border-radius: 0.5rem;" />
 	{/if}
-	<button type="submit" disabled={!file || !selectedModelId || loading || models.length === 0}>
+	<button type="submit" disabled={!file || !!error || !selectedModelId || loading || models.length === 0}>
 		{loading ? 'Identifying…' : 'Identify species'}
 	</button>
 	{#if error}

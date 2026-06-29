@@ -1,30 +1,41 @@
 #!/usr/bin/env python3
-"""Export CUB-200 species names for the web frontend.
+"""Export merged species names for the web frontend.
 
-Reads api/labels.json (generated from CUB classes.txt) and writes
-web/src/lib/species.json as a sorted-friendly ordered list.
+Reads api/labels.json (CUB-200) and api/inat_labels.json (iNat birds),
+deduplicates by normalized name (CUB names win on overlap), and writes
+web/src/lib/species.json as a sorted list.
 """
 
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-LABELS_PATH = PROJECT_ROOT / "api" / "labels.json"
+CUB_LABELS_PATH = PROJECT_ROOT / "api" / "labels.json"
+INAT_LABELS_PATH = PROJECT_ROOT / "api" / "inat_labels.json"
 OUTPUT_PATH = PROJECT_ROOT / "web" / "src" / "lib" / "species.json"
 CLASSES_PATH = PROJECT_ROOT / "data" / "raw" / "CUB_200_2011" / "classes.txt"
 
 
-def load_labels() -> dict[int, str]:
-    if LABELS_PATH.exists() and LABELS_PATH.stat().st_size > 0:
-        with open(LABELS_PATH) as f:
+def normalize_name(name: str) -> str:
+    """Lowercase key for deduplication; strip punctuation and extra spaces."""
+    key = name.lower()
+    key = re.sub(r"[^\w\s]", " ", key)
+    key = re.sub(r"\s+", " ", key).strip()
+    return key
+
+
+def load_cub_labels() -> dict[int, str]:
+    if CUB_LABELS_PATH.exists() and CUB_LABELS_PATH.stat().st_size > 0:
+        with open(CUB_LABELS_PATH) as f:
             raw = json.load(f)
         return {int(k): v for k, v in raw.items()}
 
     if not CLASSES_PATH.exists():
         raise FileNotFoundError(
-            f"No labels at {LABELS_PATH} and no CUB classes at {CLASSES_PATH}"
+            f"No labels at {CUB_LABELS_PATH} and no CUB classes at {CLASSES_PATH}"
         )
 
     labels: dict[int, str] = {}
@@ -34,14 +45,50 @@ def load_labels() -> dict[int, str]:
     return labels
 
 
+def load_inat_labels() -> dict[int, str]:
+    if not INAT_LABELS_PATH.exists():
+        raise FileNotFoundError(
+            f"Missing {INAT_LABELS_PATH}. Run: python scripts/make_inat_labels.py"
+        )
+    with open(INAT_LABELS_PATH) as f:
+        raw = json.load(f)
+    return {int(k): v for k, v in raw.items()}
+
+
+def merge_species(cub: dict[int, str], inat: dict[int, str]) -> list[str]:
+    seen: set[str] = set()
+    merged: list[str] = []
+
+    for i in range(len(cub)):
+        name = cub[i]
+        key = normalize_name(name)
+        if key not in seen:
+            seen.add(key)
+            merged.append(name)
+
+    for i in range(len(inat)):
+        name = inat[i]
+        key = normalize_name(name)
+        if key not in seen:
+            seen.add(key)
+            merged.append(name)
+
+    merged.sort(key=lambda n: n.lower())
+    return merged
+
+
 def main():
-    labels = load_labels()
-    species = [labels[i] for i in range(len(labels))]
+    cub = load_cub_labels()
+    inat = load_inat_labels()
+    species = merge_species(cub, inat)
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     with open(OUTPUT_PATH, "w") as f:
         json.dump(species, f, indent=2)
         f.write("\n")
-    print(f"Wrote {len(species)} species to {OUTPUT_PATH}")
+    print(
+        f"Wrote {len(species)} species to {OUTPUT_PATH} "
+        f"({len(cub)} CUB + {len(inat)} iNat, deduplicated)"
+    )
 
 
 if __name__ == "__main__":

@@ -36,11 +36,17 @@ body {
 a {
 	color: var(--accent);
 	text-decoration: none;
+	overflow-wrap: anywhere;
 }
 
 a:hover {
 	color: var(--accent-hover);
 	text-decoration: underline;
+}
+
+code {
+	overflow-wrap: break-word;
+	word-break: break-word;
 }
 
 .site-header {
@@ -101,6 +107,7 @@ nav a[aria-current='page'] {
 main {
 	padding-top: 2rem;
 	padding-bottom: 3rem;
+	overflow-x: clip;
 }
 
 .page-title {
@@ -120,6 +127,27 @@ main {
 	border-radius: var(--radius);
 	padding: 1.25rem;
 	margin-bottom: 1.25rem;
+	overflow-wrap: break-word;
+}
+
+.card pre {
+	margin: 0;
+	padding: 0.75rem 1rem;
+	background: var(--bg);
+	border: 1px solid var(--border);
+	border-radius: calc(var(--radius) - 2px);
+	overflow-x: auto;
+	max-width: 100%;
+	-webkit-overflow-scrolling: touch;
+}
+
+.card pre code {
+	display: block;
+	font-size: 0.85rem;
+	line-height: 1.5;
+	white-space: pre;
+	word-break: normal;
+	overflow-wrap: normal;
 }
 
 .card h2 {
