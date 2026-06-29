@@ -50,6 +50,15 @@ The script (`scripts/create_val_split.py`):
 
 Configure the path in YAML: `data.val_split_file: splits/val_split.txt`
 
+### Verifying the dataset
+
+```bash
+python scripts/verify_cub.py
+python scripts/verify_cub.py --data-dir data/raw/CUB_200_2011 --val-split splits/val_split.txt
+```
+
+Checks metadata files, image counts, val split row count, and `CUBDataset` train/val/test loader sizes.
+
 ## Dataset class: `CUBDataset`
 
 Implemented in [`training/datasets/cub.py`](../training/datasets/cub.py).
@@ -156,6 +165,15 @@ data:
   val_split_file: splits/inat_val_split.txt
   use_bbox_crop: false
 ```
+
+### Verifying the dataset
+
+```bash
+python scripts/verify_inat2021.py
+python scripts/verify_inat2021.py --data-dir data/raw/iNat_2021 --val-split splits/inat_val_split.txt
+```
+
+Checks folder/image counts, JSON path resolution, bird subset sizes, val split rows, and expected `INat2021Dataset` loader sizes (66,870 / 7,430 / 14,860).
 
 ### Dataset class: `INat2021Dataset`
 

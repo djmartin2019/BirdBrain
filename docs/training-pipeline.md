@@ -29,6 +29,19 @@ Both EfficientNet-B0 and ResNet50 follow five stages. Each stage:
 | 4 | `efficientnet_stage4_finetune.yaml` | 3 blocks | standard | no | `birdbrain_v1-3.pt` |
 | 5 | `efficientnet_stage5_bbox.yaml` | 5 blocks | strong | yes | `birdbrain_v1-4.pt` |
 
+### EfficientNet-B0 iNat birds (4 stages)
+
+Trains on iNat 2021 birds only (`num_classes: 1486`). Stage 1 loads the CUB stage-5 checkpoint as backbone init (`birdbrain_v1-4.pt`); no bbox stage.
+
+| Stage | Config | Unfreeze | Aug | Output |
+|-------|--------|----------|-----|--------|
+| 1 | `efficientnet_inat_stage1_head.yaml` | 0 blocks (head only) | minimal | `birdbrain_inat_v1.pt` |
+| 2 | `efficientnet_inat_stage2_last_block.yaml` | 1 block | minimal | `birdbrain_inat_v1-1.pt` |
+| 3 | `efficientnet_inat_stage3_finetune.yaml` | 3 blocks | standard | `birdbrain_inat_v1-2.pt` |
+| 4 | `efficientnet_inat_stage4_finetune.yaml` | 5 blocks | strong | `birdbrain_inat_v1-3.pt` |
+
+Run after verifying data: `python scripts/verify_inat2021.py`. Final test eval uses `--split test` (official iNat `val.json`, birds filtered).
+
 ### ResNet50 stages
 
 | Stage | Config | Unfreeze | Aug | Bbox | Output |

@@ -13,7 +13,6 @@ import argparse
 import json
 from pathlib import Path
 
-import mlflow
 import torch
 import torch.nn as nn
 
@@ -122,6 +121,8 @@ def evaluate_checkpoint(
     save_report(report, _resolve_checkpoint_path(output_path))
 
     if log_mlflow:
+        import mlflow
+
         mlflow.set_tracking_uri(cfg.mlflow.tracking_uri)
         mlflow.set_experiment(cfg.mlflow.experiment)
         run_name = f"eval-{checkpoint_path.stem}-{split}"

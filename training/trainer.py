@@ -20,6 +20,20 @@ def get_device():
     return torch.device("cpu")
 
 
+def _load_compatible_state_dict(model, state_dict):
+    """Load checkpoint weights where shapes match; skip mismatched layers (e.g. classifier head)."""
+    model_state = model.state_dict()
+    compatible = {
+        key: value
+        for key, value in state_dict.items()
+        if key in model_state and value.shape == model_state[key].shape
+    }
+    skipped = set(state_dict) - set(compatible)
+    if skipped:
+        print(f"Skipped {len(skipped)} incompatible key(s): {', '.join(sorted(skipped))}")
+    model.load_state_dict(compatible, strict=False)
+
+
 def load_checkpoint(model, checkpoint_path: Path | None, device):
     if checkpoint_path is None:
         return None
@@ -29,7 +43,7 @@ def load_checkpoint(model, checkpoint_path: Path | None, device):
         return None
 
     checkpoint = torch.load(checkpoint_path, map_location=device)
-    model.load_state_dict(checkpoint["state_dict"], strict=False)
+    _load_compatible_state_dict(model, checkpoint["state_dict"])
 
     prior_val_acc = checkpoint.get("best_val_acc")
     if prior_val_acc is not None:
